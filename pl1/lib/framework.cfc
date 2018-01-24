@@ -1,6 +1,7 @@
-<!--- version 1.18.1.19 --->
-<cfcomponent>
+<!--- version 1.14.8.25 --->
+<cfcomponent extends="mura.cfobject">
 	<cfset variables.controllers = structNew()>
+	<cfset variables.beans = structNew()>
 
 	<cffunction name="init" access="public" returntype="any" output="false">
 		<cfargument name="pluginConfig" type="any" required="true">
@@ -20,9 +21,7 @@
 			<cfset var req = structNew()>
 			<cfset structAppend(req, url)>
 			<cfset structAppend(req, form)>
-			<cfif structKeyExists(session, "siteID")>
-				<cfset req.siteID = session.siteID>
-			</cfif>
+			<cfset req.siteID = structKeyExists(session, "siteID") ? session.siteID : "default">
 			<cfset var $ = application.serviceFactory.getBean("MuraScope").init(req)>
 		</cfif>
 
@@ -255,5 +254,27 @@
 		}>
 
 		<cfreturn returnVar>
+	</cffunction>
+
+	<cffunction name="autoWire">
+		<cfargument name="folder" default="model" required="true">
+		<cfset var rs = "">
+
+		<cfdirectory directory="#expandPath("/#variables.pluginConfig.getPackage()#/#arguments.folder#")#" action="list" name="rs" filter="*.cfc">
+		<cfloop query="rs">
+			<cfset variables.beans[listFirst(rs.name, '.')] = createObject("component", "#variables.pluginConfig.getPackage()#.#arguments.folder#.#listFirst(rs.name, '.')#").init(variables.pluginConfig)>
+		</cfloop>
+		
+	</cffunction>
+
+	<cffunction name="getBean">
+		<cfargument name="beanName" required="true">
+
+		<cfif structKeyExists(variables.beans, arguments.beanName)>
+			<cfreturn variables.beans[arguments.beanName]>
+		<cfelse>
+			<cfreturn super.getBean(arguments.beanName)>
+		</cfif>
+
 	</cffunction>
 </cfcomponent>
