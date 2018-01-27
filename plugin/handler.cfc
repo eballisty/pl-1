@@ -7,9 +7,11 @@ component extends="mura.plugin.pluginGenericEventHandler" accessors=true output=
 	}
 
 	private void function loadFramework(required struct $) output=false {
-		application[variables.package] = structNew();
-		application[variables.package].framework = createObject("component", "#variables.package#.pl1.lib.framework").init(variables.pluginConfig);
-		application[variables.package].framework.autoWire();
+		lock name="frameworkInitBlock-#variables.package#" type="exclusive" timeout="200" {
+			application[variables.package] = structNew();
+			application[variables.package].framework = createObject("component", "#variables.package#.pl1.lib.framework").init(variables.pluginConfig);
+			application[variables.package].framework.autoWire();
+		}
 	}
 
 	public any function onGlobalRequestStart(required struct $) {

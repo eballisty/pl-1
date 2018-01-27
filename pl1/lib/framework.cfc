@@ -1,4 +1,4 @@
-<!--- version 1.14.8.25 --->
+<!--- version 1.18.1.19 --->
 <cfcomponent extends="mura.cfobject">
 	<cfset variables.controllers = structNew()>
 	<cfset variables.beans = structNew()>
@@ -53,7 +53,7 @@
 			<cfset $.rc = structNew()>
 			<cfset $.rp = rp>
 			<cfset $.rc.pluginConfig = variables.pluginConfig>
-			<cfset structAppend($.rc, application[variables.pluginConfig.getPackage()])>
+			<cfset structAppend($.rc, variables.beans)>
 
 			<cfif structKeyExists(rp.controller, rp.action)>
 				<cfinvoke component="#rp.controller#" method="#rp.action#">
@@ -264,7 +264,7 @@
 		<cfloop query="rs">
 			<cfset variables.beans[listFirst(rs.name, '.')] = createObject("component", "#variables.pluginConfig.getPackage()#.#arguments.folder#.#listFirst(rs.name, '.')#").init(variables.pluginConfig)>
 		</cfloop>
-		
+
 	</cffunction>
 
 	<cffunction name="getBean">
