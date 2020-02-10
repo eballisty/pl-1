@@ -22,7 +22,7 @@
 			<cfset structAppend(req, url)>
 			<cfset structAppend(req, form)>
 			<cfset req.siteID = structKeyExists(session, "siteID") ? session.siteID : "default">
-			<cfset var $ = application.serviceFactory.getBean("MuraScope").init(req)>
+			<cfset local.$ = application.serviceFactory.getBean("MuraScope").init(req)>
 		</cfif>
 
 		<cfset var params = getCallingParams()>
@@ -237,14 +237,15 @@
 
 	<cffunction name="getCallingParams">
 		<cfset var stackTrace = getStackTrace()>
-		<cfset var callingFilePath = stackTrace[7]>
-		<cfset var arrPaths = listToArray(callingFilePath, "/")>
+		<cfset var fd = application.configBean.getFileDelim()>
+		<cfset var callingFilePath = stackTrace[arrayLen(stackTrace)]>
+		<cfset callingFilePath = replace(callingFilePath, expandPath(fd), "")>
+		<cfset var arrPaths = listToArray(callingFilePath, fd)>
+		<cfset arrayDeleteAt(arrPaths, arrayLen(arrPaths))>
+		<cfset var section = arrPaths[arrayLen(arrPaths)]>
 
 		<cfset arrayDeleteAt(arrPaths, arrayLen(arrPaths))>
-		<cfset var section = arrPaths[len(arrPaths)]>
-
-		<cfset arrayDeleteAt(arrPaths, arrayLen(arrPaths))>
-		<cfset var baseFilePath = arrayToList(arrPaths, "/")>
+		<cfset var baseFilePath = arrayToList(arrPaths, fd)>
 		<cfset var package = arrayToList(arrPaths, ".")>
 
 		<cfset returnVar = {
